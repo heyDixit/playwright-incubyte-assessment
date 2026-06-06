@@ -30,7 +30,13 @@ This is a Playwright BDD framework created for the Incubyte assessment. It's a b
 
 Video Proof:
 
-- [Test 1](videos/setup-guide.webm)
-- [Test 2](videos/running-tests.webm)
-- [Test 3](videos/writing-test-cases.webm)
-- [Test 4](videos/debugging-tests.webm)
+- [Test 1](videos/Test1.webm)
+- [Test 2](videos/Test2.webm)
+- [Test 3](videos/Test3.webm)
+- [Test 4](videos/Test4.webm)
+
+## 📋 Test Cases
+
+Complete test case documentation is available in the [testcases](testcases/) folder:
+
+- [TestCases.csv](testcases\Parabank_TestCases.xlsx) - Detailed test cases with steps, expected results, and tags
