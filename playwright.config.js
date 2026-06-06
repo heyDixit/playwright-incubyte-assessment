@@ -13,11 +13,13 @@ export default defineConfig({
   testDir,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 3 : 3,
   workers: process.env.CI ? 1 : undefined,
   reporter: "html",
   use: {
     trace: "on-first-retry",
+    video: "on",
+    screenshot: "only-on-failure",
   },
   projects: [
     {

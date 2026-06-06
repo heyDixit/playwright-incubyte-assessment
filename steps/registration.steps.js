@@ -4,9 +4,12 @@ import { faker } from "@faker-js/faker";
 import { HomePage } from "../pages/HomePage.js";
 import { RegistrationPage } from "../pages/RegistrationPage.js";
 import { AccountPage } from "../pages/AccountPage.js";
+import { CustomerInfo } from "../data/customerinfo.data.js";
 
 const { Given, When, Then } = createBdd();
-const testUsername = faker.internet.username();
+const customerInfo = new CustomerInfo();
+const testUsername = customerInfo.username;
+const testPassword = customerInfo.password;
 
 let homePage;
 let registrationPage;
@@ -16,7 +19,7 @@ Given("I am on the Parabank home page", async ({ page }) => {
   homePage = new HomePage(page);
   await homePage.navigate();
   const isLoaded = await homePage.isHomePageLoaded();
-  expect(isLoaded).toBe(true);
+  await expect(isLoaded).toBe(true);
 });
 
 When("I click on the Register link", async ({ page }) => {
@@ -26,16 +29,17 @@ When("I click on the Register link", async ({ page }) => {
 
 When("I fill in the registration form with valid data", async ({ page }) => {
   await registrationPage.fillRegistrationForm(
-    "John",
-    "Doe",
-    "abc",
-    "def",
-    "ghi",
-    "111111",
-    "9999999999",
-    "123-45-6789",
+    customerInfo.firstName,
+    customerInfo.lastName,
+    customerInfo.address,
+    customerInfo.city,
+    customerInfo.state,
+    customerInfo.zipCode,
+    customerInfo.phoneNumber,
+    customerInfo.ssn,
     testUsername,
-    "Password13133123!",
+    testPassword,
+    testPassword,
   );
 });
 
@@ -45,18 +49,18 @@ When("I submit the registration form", async ({ page }) => {
 
 Then("I should see a success message", async ({ page }) => {
   const isSuccessful = await registrationPage.isSuccessMessageVisible();
-  expect(isSuccessful).toBe(true);
+  await expect(isSuccessful).toBe(true);
   await registrationPage.logout();
 });
 
 When("I log in with my new credentials", async ({ page }) => {
-  await homePage.loginUser(testUsername, "Password13133123!");
+  await homePage.loginUser(testUsername, testPassword);
   accountPage = new AccountPage(page);
 });
 
 Then("I should be on the account overview page", async ({ page }) => {
   const isLoaded = await accountPage.isAccountOverviewPageLoaded();
-  expect(isLoaded).toBe(true);
+  await expect(isLoaded).toBe(true);
 });
 
 Then("I print the account balance", async ({ page }) => {
@@ -64,68 +68,67 @@ Then("I print the account balance", async ({ page }) => {
 });
 
 When("I leave all registration fields empty", async ({ page }) => {
-  // Just proceed without filling any fields
+  // lEFT EMPTY AS THE FILLING OF THE FORM IS NOT REQUIRED
 });
 
 Then(
   "I should see validation errors for all required fields",
   async ({ page }) => {
-    const errorMessages = page.locator(
-      '.error, .validation-error, [role="alert"]',
-    );
-    const count = await errorMessages.count();
-    expect(count).toBeGreaterThan(0);
+    const hasErrors = await registrationPage.hasValidationErrors();
+    expect(hasErrors).toBe(true);
   },
 );
 
 When(
   "I fill in the registration form with an existing username",
   async ({ page }) => {
-    await page.locator('[id="customer.firstName"]').fill("John");
-    await page.locator('[id="customer.lastName"]').fill("Doe");
-    await page.locator('[id="customer.address.street"]').fill("abc");
-    await page.locator('[id="customer.address.city"]').fill("def");
-    await page.locator('[id="customer.address.state"]').fill("ghi");
-    await page.locator('[id="customer.address.zipCode"]').fill("111111");
-    await page.locator('[id="customer.phoneNumber"]').fill("9999999999");
-    await page.locator('[id="customer.ssn"]').fill("123-45-6789");
-    await page.locator('[id="customer.username"]').fill("test.test");
-    await page.locator('[id="customer.password"]').fill("Password13133123!");
-    await page.locator("#repeatedPassword").fill("Password13133123!");
+    await registrationPage.fillRegistrationForm(
+      customerInfo.firstName,
+      customerInfo.lastName,
+      customerInfo.address,
+      customerInfo.city,
+      customerInfo.state,
+      customerInfo.zipCode,
+      customerInfo.phoneNumber,
+      customerInfo.ssn,
+      customerInfo.existingUsername,
+      customerInfo.password,
+      customerInfo.confirmPassword,
+    );
   },
 );
 
 Then(
   "I should see an error message indicating username already exists",
   async ({ page }) => {
-    await expect(page.locator('[id="customer.username.errors"]')).toContainText(
-      "This username already exists.",
-    );
+    const hasError = await registrationPage.checkUsernameAlreadyExistsError();
+    expect(hasError).toBe(true);
   },
 );
 
 When(
   "I fill in the registration form with mismatched passwords",
   async ({ page }) => {
-    await page.locator('[id="customer.firstName"]').fill("John");
-    await page.locator('[id="customer.lastName"]').fill("Doe");
-    await page.locator('[id="customer.address.street"]').fill("abc");
-    await page.locator('[id="customer.address.city"]').fill("def");
-    await page.locator('[id="customer.address.state"]').fill("ghi");
-    await page.locator('[id="customer.address.zipCode"]').fill("111111");
-    await page.locator('[id="customer.phoneNumber"]').fill("9999999999");
-    await page.locator('[id="customer.ssn"]').fill("123-45-6789");
-    await page.locator('[id="customer.username"]').fill("newuser123");
-    await page.locator('[id="customer.password"]').fill("Password13133123!");
-    await page.locator("#repeatedPassword").fill("DifferentPassword!");
+    await registrationPage.fillRegistrationForm(
+      customerInfo.firstName,
+      customerInfo.lastName,
+      customerInfo.address,
+      customerInfo.city,
+      customerInfo.state,
+      customerInfo.zipCode,
+      customerInfo.phoneNumber,
+      customerInfo.ssn,
+      customerInfo.username,
+      customerInfo.password,
+      customerInfo.wrongPassword,
+    );
   },
 );
 
 Then(
   "I should see an error message indicating passwords do not match",
   async ({ page }) => {
-    await expect(page.locator('[id="repeatedPassword.errors"]')).toContainText(
-      "Passwords did not match.",
-    );
+    const hasError = await registrationPage.checkPasswordMismatchError();
+    expect(hasError).toBe(true);
   },
 );
