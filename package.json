@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "npx bddgen && npx playwright test",
+    "test:headed": "npx bddgen && npx playwright test --headed",
+    "test:chromium": "npx bddgen && npx playwright test --project=chromium --headed",
+    "test:debug": "npx playwright test --debug",
+    "report": "npx playwright show-report",
+    "bddgen": "npx bddgen"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
